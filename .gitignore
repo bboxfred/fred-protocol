@@ -1,0 +1,17 @@
+# Local IDE / Claude Code
+.claude/
+.playwright-mcp/
+
+# OS
+.DS_Store
+
+# Local settings
+*.local.json
+
+# Duplicate logos (originals in web/public/logos/)
+web/Logos/
+
+# Node
+node_modules/
+.next/
+.vercel/

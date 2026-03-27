@@ -1,0 +1,605 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://hungryhuman.co/fredprotocol/schema/0.1/fred.json",
+  "title": "FRED Protocol",
+  "description": "Schema for fred.json — the FRED Protocol entity descriptor file (v0.1)",
+  "type": "object",
+  "required": ["fred", "identity"],
+  "additionalProperties": false,
+  "properties": {
+    "fred": {
+      "type": "string",
+      "description": "FRED Protocol version",
+      "pattern": "^\\d+\\.\\d+$",
+      "examples": ["0.1"]
+    },
+    "identity": { "$ref": "#/$defs/Identity" },
+    "capabilities": {
+      "type": "array",
+      "description": "What this entity can do",
+      "items": { "$ref": "#/$defs/Capability" }
+    },
+    "interaction": { "$ref": "#/$defs/Interaction" },
+    "trust": { "$ref": "#/$defs/Trust" },
+    "pricing": { "$ref": "#/$defs/Pricing" },
+    "context": { "$ref": "#/$defs/Context" },
+    "discovery": { "$ref": "#/$defs/Discovery" },
+    "policy": { "$ref": "#/$defs/Policy" }
+  },
+  "$defs": {
+    "Identity": {
+      "type": "object",
+      "description": "Layer 1: Who is this entity?",
+      "required": ["name", "type", "description", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "Display name of the entity",
+          "minLength": 1,
+          "maxLength": 256
+        },
+        "type": {
+          "type": "string",
+          "description": "Entity type",
+          "enum": ["organization", "person", "product", "api", "dataset", "community", "marketplace", "infrastructure"]
+        },
+        "description": {
+          "type": "string",
+          "description": "One-line description of what this entity is",
+          "minLength": 1,
+          "maxLength": 1024
+        },
+        "url": {
+          "type": "string",
+          "description": "Canonical URL of this entity",
+          "format": "uri"
+        },
+        "logo": {
+          "type": "string",
+          "description": "URL to the entity's logo image",
+          "format": "uri"
+        },
+        "contacts": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Contact" }
+        },
+        "locale": {
+          "type": "string",
+          "description": "Primary locale (BCP 47)",
+          "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+        },
+        "locales": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+          }
+        },
+        "established": {
+          "type": "string",
+          "description": "Date the entity was established",
+          "format": "date"
+        },
+        "jurisdiction": {
+          "type": "string",
+          "description": "Legal jurisdiction (ISO 3166-1 alpha-2)",
+          "pattern": "^[A-Z]{2}$"
+        },
+        "identifiers": { "$ref": "#/$defs/Identifiers" }
+      }
+    },
+    "Contact": {
+      "type": "object",
+      "required": ["type", "value"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["email", "url", "phone", "social"]
+        },
+        "value": { "type": "string" },
+        "label": { "type": "string" }
+      }
+    },
+    "Identifiers": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "lei": { "type": "string", "description": "Legal Entity Identifier" },
+        "duns": { "type": "string", "description": "D-U-N-S Number" },
+        "vat": { "type": "string", "description": "VAT registration number" },
+        "custom": {
+          "type": "object",
+          "additionalProperties": { "type": "string" }
+        }
+      }
+    },
+    "Capability": {
+      "type": "object",
+      "description": "A discrete capability this entity offers",
+      "required": ["id", "name", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique identifier within this file",
+          "pattern": "^[a-z0-9][a-z0-9_-]*$"
+        },
+        "name": { "type": "string", "minLength": 1 },
+        "description": { "type": "string", "minLength": 1 },
+        "category": { "type": "string" },
+        "inputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CapabilityParam" }
+        },
+        "outputs": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CapabilityParam" }
+        },
+        "constraints": { "$ref": "#/$defs/CapabilityConstraints" },
+        "examples": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/CapabilityExample" }
+        }
+      }
+    },
+    "CapabilityParam": {
+      "type": "object",
+      "required": ["name", "type", "description"],
+      "additionalProperties": false,
+      "properties": {
+        "name": { "type": "string" },
+        "type": {
+          "type": "string",
+          "enum": ["string", "number", "boolean", "object", "array", "file"]
+        },
+        "required": { "type": "boolean" },
+        "description": { "type": "string" }
+      }
+    },
+    "CapabilityConstraints": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "rate_limit": { "type": "string" },
+        "max_payload": { "type": "string" },
+        "regions": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
+        },
+        "auth_required": { "type": "boolean" }
+      }
+    },
+    "CapabilityExample": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "input": {},
+        "output": {},
+        "description": { "type": "string" }
+      }
+    },
+    "Interaction": {
+      "type": "object",
+      "description": "Layer 3: How to interact with this entity",
+      "additionalProperties": false,
+      "properties": {
+        "protocols": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Protocol" }
+        },
+        "webhooks": { "$ref": "#/$defs/Webhooks" },
+        "rate_limits": { "$ref": "#/$defs/RateLimits" },
+        "sdks": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/SDK" }
+        }
+      }
+    },
+    "Protocol": {
+      "type": "object",
+      "required": ["type", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["rest", "graphql", "grpc", "websocket", "mcp", "a2a", "llms_txt", "openapi", "soap", "webhook", "browser", "custom"]
+        },
+        "version": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "description": { "type": "string" },
+        "auth": { "$ref": "#/$defs/Auth" }
+      }
+    },
+    "Auth": {
+      "type": "object",
+      "required": ["type"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["none", "api_key", "oauth2", "bearer", "basic", "custom"]
+        },
+        "instructions_url": { "type": "string", "format": "uri" },
+        "scopes": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "Webhooks": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "supported": { "type": "boolean" },
+        "events": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "registration_url": { "type": "string", "format": "uri" }
+      }
+    },
+    "RateLimits": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "default": { "type": "string" },
+        "authenticated": { "type": "string" },
+        "burst": { "type": "string" }
+      }
+    },
+    "SDK": {
+      "type": "object",
+      "required": ["language", "package", "url"],
+      "additionalProperties": false,
+      "properties": {
+        "language": { "type": "string" },
+        "package": { "type": "string" },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "Trust": {
+      "type": "object",
+      "description": "Layer 4: Trust signals and verification",
+      "additionalProperties": false,
+      "properties": {
+        "verified_domain": { "type": "boolean" },
+        "verification": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Verification" }
+        },
+        "reputation": { "$ref": "#/$defs/Reputation" },
+        "compliance": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Compliance" }
+        },
+        "security": { "$ref": "#/$defs/Security" },
+        "transparency": { "$ref": "#/$defs/Transparency" }
+      }
+    },
+    "Verification": {
+      "type": "object",
+      "required": ["type", "issuer"],
+      "additionalProperties": false,
+      "properties": {
+        "type": {
+          "type": "string",
+          "enum": ["domain", "business", "identity", "ssl", "social", "marketplace", "government", "third_party", "community"]
+        },
+        "issuer": { "type": "string" },
+        "url": { "type": "string", "format": "uri" },
+        "issued": { "type": "string", "format": "date" },
+        "expires": { "type": "string", "format": "date" }
+      }
+    },
+    "Reputation": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "users": { "type": "integer", "minimum": 0 },
+        "rating": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "score": { "type": "number", "minimum": 0, "maximum": 5 },
+            "count": { "type": "integer", "minimum": 0 },
+            "source": { "type": "string" },
+            "url": { "type": "string", "format": "uri" }
+          }
+        },
+        "uptime": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "percentage": { "type": "number", "minimum": 0, "maximum": 100 },
+            "url": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    },
+    "Compliance": {
+      "type": "object",
+      "required": ["standard", "status"],
+      "additionalProperties": false,
+      "properties": {
+        "standard": { "type": "string" },
+        "status": {
+          "type": "string",
+          "enum": ["compliant", "certified", "in_progress"]
+        },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "Security": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "bug_bounty": { "type": "string", "format": "uri" },
+        "security_contact": { "type": "string" },
+        "security_txt": { "type": "string", "format": "uri" }
+      }
+    },
+    "Transparency": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "open_source": { "type": "string", "format": "uri" },
+        "changelog": { "type": "string", "format": "uri" },
+        "status_page": { "type": "string", "format": "uri" }
+      }
+    },
+    "Pricing": {
+      "type": "object",
+      "description": "Layer 5: Pricing and transaction information",
+      "required": ["currency", "model"],
+      "additionalProperties": false,
+      "properties": {
+        "currency": {
+          "type": "string",
+          "description": "ISO 4217 currency code",
+          "pattern": "^[A-Z]{3}$"
+        },
+        "model": {
+          "type": "string",
+          "enum": ["free", "freemium", "subscription", "pay_per_use", "one_time", "custom", "contact"]
+        },
+        "free_tier": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "available": { "type": "boolean" },
+            "limits": { "type": "string" }
+          }
+        },
+        "plans": {
+          "type": "array",
+          "items": { "$ref": "#/$defs/Plan" }
+        },
+        "payment_methods": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "trial": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "available": { "type": "boolean" },
+            "duration": { "type": "string" },
+            "requires_payment": { "type": "boolean" }
+          }
+        },
+        "negotiable": { "type": "boolean" }
+      }
+    },
+    "Plan": {
+      "type": "object",
+      "required": ["id", "name", "price"],
+      "additionalProperties": false,
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "description": { "type": "string" },
+        "price": {
+          "type": "object",
+          "required": ["amount"],
+          "additionalProperties": false,
+          "properties": {
+            "amount": { "type": "number", "minimum": 0 },
+            "interval": {
+              "type": "string",
+              "enum": ["month", "year", "one_time", "per_use"]
+            },
+            "unit": { "type": "string" }
+          }
+        },
+        "features": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "limits": {
+          "type": "object",
+          "additionalProperties": {}
+        },
+        "url": { "type": "string", "format": "uri" }
+      }
+    },
+    "Context": {
+      "type": "object",
+      "description": "Layer 6: Additional context for agents",
+      "additionalProperties": false,
+      "properties": {
+        "industry": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "tags": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "languages": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z]{2}(-[A-Z]{2})?$"
+          }
+        },
+        "faq": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["question", "answer"],
+            "additionalProperties": false,
+            "properties": {
+              "question": { "type": "string" },
+              "answer": { "type": "string" }
+            }
+          }
+        },
+        "knowledge_base": { "type": "string", "format": "uri" },
+        "llms_txt": { "type": "string", "format": "uri" },
+        "changelog": { "type": "string", "format": "uri" },
+        "blog": { "type": "string", "format": "uri" },
+        "use_cases": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["title", "description"],
+            "additionalProperties": false,
+            "properties": {
+              "title": { "type": "string" },
+              "description": { "type": "string" },
+              "url": { "type": "string", "format": "uri" }
+            }
+          }
+        },
+        "limitations": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "sla": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "response_time": { "type": "string" },
+            "availability": { "type": "string" },
+            "support_hours": { "type": "string" }
+          }
+        }
+      }
+    },
+    "Discovery": {
+      "type": "object",
+      "description": "Layer 7: Related entities and ecosystem",
+      "additionalProperties": false,
+      "properties": {
+        "related": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "relationship"],
+            "additionalProperties": false,
+            "properties": {
+              "url": { "type": "string", "format": "uri" },
+              "relationship": {
+                "type": "string",
+                "enum": ["partner", "provider", "consumer", "competitor", "parent", "subsidiary", "integration", "community"]
+              },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "ecosystem": { "type": "string", "format": "uri" },
+        "parent": { "type": "string", "format": "uri" },
+        "children": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "name"],
+            "additionalProperties": false,
+            "properties": {
+              "url": { "type": "string", "format": "uri" },
+              "name": { "type": "string" },
+              "description": { "type": "string" }
+            }
+          }
+        },
+        "alternatives": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["url", "name"],
+            "additionalProperties": false,
+            "properties": {
+              "url": { "type": "string", "format": "uri" },
+              "name": { "type": "string" },
+              "differentiator": { "type": "string" }
+            }
+          }
+        }
+      }
+    },
+    "Policy": {
+      "type": "object",
+      "description": "Layer 8: Rules of engagement",
+      "additionalProperties": false,
+      "properties": {
+        "terms_of_service": { "type": "string", "format": "uri" },
+        "privacy_policy": { "type": "string", "format": "uri" },
+        "acceptable_use": { "type": "string", "format": "uri" },
+        "agent_policy": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "allowed_actions": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "restricted_actions": {
+              "type": "array",
+              "items": { "type": "string" }
+            },
+            "rate_limits": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "requests_per_minute": { "type": "integer", "minimum": 0 },
+                "requests_per_hour": { "type": "integer", "minimum": 0 },
+                "requests_per_day": { "type": "integer", "minimum": 0 }
+              }
+            },
+            "data_handling": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "storage_allowed": { "type": "boolean" },
+                "retention_period": { "type": "string" },
+                "sharing_allowed": { "type": "boolean" }
+              }
+            },
+            "attribution": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "required": { "type": "boolean" },
+                "format": { "type": "string" }
+              }
+            }
+          }
+        },
+        "data_residency": {
+          "type": "array",
+          "items": { "type": "string", "pattern": "^[A-Z]{2}$" }
+        },
+        "gdpr": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "dpo_contact": { "type": "string" },
+            "data_processing_agreement": { "type": "string", "format": "uri" }
+          }
+        }
+      }
+    }
+  }
+}

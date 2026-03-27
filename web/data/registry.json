@@ -1,0 +1,18 @@
+[
+  {
+    "domain": "freddys.io",
+    "name": "Freddy's",
+    "type": "product",
+    "description": "AI-powered CV builder that creates professional, ATS-optimized resumes in minutes.",
+    "level": 3,
+    "claimed_at": "2025-01-01T00:00:00.000Z"
+  },
+  {
+    "domain": "claudecode.sg",
+    "name": "Claude Code Singapore",
+    "type": "community",
+    "description": "Singapore's developer community for AI-assisted coding, Claude Code workshops, and building with LLM tools.",
+    "level": 3,
+    "claimed_at": "2025-01-01T00:00:00.000Z"
+  }
+]

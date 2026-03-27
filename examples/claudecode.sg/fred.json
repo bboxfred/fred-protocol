@@ -1,0 +1,317 @@
+{
+  "fred": "0.1",
+
+  "identity": {
+    "name": "Claude Code Singapore",
+    "type": "community",
+    "description": "Singapore's developer community for AI-assisted coding, Claude Code workshops, and building with LLM tools. Meetups, hackathons, and open source collaboration.",
+    "url": "https://claudecode.sg",
+    "logo": "https://claudecode.sg/logo.png",
+    "contacts": [
+      { "type": "email", "value": "hello@claudecode.sg", "label": "General" },
+      { "type": "social", "value": "https://twitter.com/claudecodesg", "label": "Twitter" },
+      { "type": "social", "value": "https://discord.gg/claudecodesg", "label": "Discord" },
+      { "type": "url", "value": "https://lu.ma/claudecodesg", "label": "Events" }
+    ],
+    "locale": "en",
+    "locales": ["zh"],
+    "established": "2024-06-01",
+    "jurisdiction": "SG"
+  },
+
+  "capabilities": [
+    {
+      "id": "find-events",
+      "name": "Find Upcoming Events",
+      "description": "Get a list of upcoming meetups, workshops, and hackathons organized by Claude Code Singapore.",
+      "category": "data",
+      "inputs": [
+        { "name": "type", "type": "string", "required": false, "description": "Filter by event type: meetup, workshop, hackathon, all (default: all)" },
+        { "name": "after", "type": "string", "required": false, "description": "ISO 8601 date to filter events after (default: today)" },
+        { "name": "limit", "type": "number", "required": false, "description": "Max number of events to return (default: 10)" }
+      ],
+      "outputs": [
+        { "name": "events", "type": "array", "description": "Array of event objects with title, date, location, url, description, capacity, and registered count" }
+      ],
+      "constraints": {
+        "rate_limit": "100/hour",
+        "auth_required": false
+      },
+      "examples": [
+        {
+          "description": "Get next 3 upcoming events",
+          "input": { "limit": 3 },
+          "output": {
+            "events": [
+              {
+                "title": "Build with Claude Code: From Prompt to Production",
+                "date": "2026-04-12T14:00:00+08:00",
+                "location": "Google Singapore, Mapletree Business City",
+                "url": "https://lu.ma/claudecodesg-apr2026",
+                "type": "workshop",
+                "capacity": 80,
+                "registered": 52
+              }
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "id": "find-members",
+      "name": "Find Community Members",
+      "description": "Search for community members by skills, interests, or availability for collaboration.",
+      "category": "search",
+      "inputs": [
+        { "name": "skills", "type": "array", "required": false, "description": "Filter by skills (e.g., ['typescript', 'ai', 'nextjs'])" },
+        { "name": "available_for", "type": "string", "required": false, "description": "Filter by availability: mentoring, collaboration, hiring, speaking" },
+        { "name": "limit", "type": "number", "required": false, "description": "Max results (default: 20)" }
+      ],
+      "outputs": [
+        { "name": "members", "type": "array", "description": "Array of member profiles with name, bio, skills, links, and availability" }
+      ],
+      "constraints": {
+        "rate_limit": "50/hour",
+        "auth_required": true
+      }
+    },
+    {
+      "id": "submit-talk",
+      "name": "Submit Talk Proposal",
+      "description": "Submit a talk or workshop proposal for an upcoming community event.",
+      "category": "content",
+      "inputs": [
+        { "name": "title", "type": "string", "required": true, "description": "Talk title" },
+        { "name": "abstract", "type": "string", "required": true, "description": "Talk abstract (200-500 words)" },
+        { "name": "speaker_name", "type": "string", "required": true, "description": "Speaker name" },
+        { "name": "speaker_email", "type": "string", "required": true, "description": "Speaker email" },
+        { "name": "duration", "type": "string", "required": false, "description": "Preferred duration: lightning (5min), short (15min), full (30min), workshop (60-120min)" },
+        { "name": "topic_tags", "type": "array", "required": false, "description": "Topic tags for the talk" }
+      ],
+      "outputs": [
+        { "name": "proposal_id", "type": "string", "description": "Unique ID for tracking the proposal" },
+        { "name": "status", "type": "string", "description": "Submission status (submitted, under_review, accepted, declined)" }
+      ],
+      "constraints": {
+        "rate_limit": "10/hour",
+        "auth_required": true
+      }
+    },
+    {
+      "id": "get-resources",
+      "name": "Get Learning Resources",
+      "description": "Browse curated learning resources, tutorials, and project templates shared by the community.",
+      "category": "data",
+      "inputs": [
+        { "name": "topic", "type": "string", "required": false, "description": "Filter by topic (e.g., 'claude-code', 'mcp', 'ai-sdk', 'prompting')" },
+        { "name": "type", "type": "string", "required": false, "description": "Resource type: tutorial, template, video, article, tool (default: all)" }
+      ],
+      "outputs": [
+        { "name": "resources", "type": "array", "description": "Array of resources with title, url, description, author, type, and rating" }
+      ],
+      "constraints": {
+        "rate_limit": "100/hour",
+        "auth_required": false
+      }
+    }
+  ],
+
+  "interaction": {
+    "protocols": [
+      {
+        "type": "rest",
+        "version": "1",
+        "url": "https://api.claudecode.sg/v1",
+        "description": "Community API for events, members, and resources",
+        "auth": {
+          "type": "bearer",
+          "instructions_url": "https://docs.claudecode.sg/api/auth"
+        }
+      },
+      {
+        "type": "mcp",
+        "url": "https://mcp.claudecode.sg",
+        "description": "MCP server for AI agent access to community data and event management"
+      },
+      {
+        "type": "llms_txt",
+        "url": "https://claudecode.sg/llms.txt",
+        "description": "LLM context file with community guidelines, event history, and resource index"
+      },
+      {
+        "type": "browser",
+        "url": "https://claudecode.sg",
+        "description": "Community website with events calendar, member directory, and resource library"
+      }
+    ],
+    "webhooks": {
+      "supported": true,
+      "events": ["event.created", "event.updated", "talk.accepted", "resource.published"],
+      "registration_url": "https://api.claudecode.sg/v1/webhooks"
+    },
+    "rate_limits": {
+      "default": "100/hour",
+      "authenticated": "500/hour"
+    }
+  },
+
+  "trust": {
+    "verified_domain": true,
+    "verification": [
+      {
+        "type": "community",
+        "issuer": "Discord Community",
+        "url": "https://discord.gg/claudecodesg"
+      },
+      {
+        "type": "social",
+        "issuer": "Twitter",
+        "url": "https://twitter.com/claudecodesg"
+      }
+    ],
+    "reputation": {
+      "users": 1200,
+      "rating": {
+        "score": 4.9,
+        "count": 156,
+        "source": "Lu.ma",
+        "url": "https://lu.ma/claudecodesg"
+      }
+    },
+    "transparency": {
+      "open_source": "https://github.com/claudecodesg",
+      "changelog": "https://claudecode.sg/changelog"
+    }
+  },
+
+  "pricing": {
+    "currency": "SGD",
+    "model": "free",
+    "free_tier": {
+      "available": true,
+      "limits": "All community features are free. Some workshops may have a nominal fee to cover venue costs."
+    },
+    "plans": [
+      {
+        "id": "community",
+        "name": "Community (Free)",
+        "price": { "amount": 0, "interval": "month" },
+        "features": ["All meetup access", "Discord community", "Resource library", "Member directory", "Talk submissions"]
+      },
+      {
+        "id": "sponsor",
+        "name": "Community Sponsor",
+        "description": "For companies that want to support the community and get visibility at events",
+        "price": { "amount": 500, "interval": "month" },
+        "features": [
+          "Logo at all events",
+          "Featured job listings",
+          "Workshop hosting priority",
+          "Direct access to talent pool",
+          "Monthly sponsor spotlight"
+        ],
+        "url": "https://claudecode.sg/sponsor"
+      }
+    ]
+  },
+
+  "context": {
+    "industry": ["developer-community", "ai", "software-engineering"],
+    "tags": ["claude-code", "ai-coding", "singapore", "developer-community", "meetups", "workshops", "mcp", "llm-tools", "open-source"],
+    "languages": ["en", "zh"],
+    "faq": [
+      {
+        "question": "How do I join the community?",
+        "answer": "Join our Discord at discord.gg/claudecodesg — it's free and open to all developers interested in AI-assisted coding."
+      },
+      {
+        "question": "Where are events held?",
+        "answer": "Events are held at various tech company offices across Singapore (Google, Shopee, GovTech) and occasionally online. Check lu.ma/claudecodesg for upcoming events."
+      },
+      {
+        "question": "Can I speak at an event?",
+        "answer": "Yes! Submit a talk proposal through our API or website. We welcome talks on Claude Code, MCP, AI SDK, prompting techniques, and any AI-assisted development topics."
+      },
+      {
+        "question": "Is this an official Anthropic community?",
+        "answer": "No. Claude Code Singapore is an independent developer community. We are not affiliated with or endorsed by Anthropic."
+      }
+    ],
+    "knowledge_base": "https://docs.claudecode.sg",
+    "llms_txt": "https://claudecode.sg/llms.txt",
+    "blog": "https://claudecode.sg/blog",
+    "use_cases": [
+      {
+        "title": "Find relevant developer events in Singapore",
+        "description": "An AI agent helping a developer relocating to Singapore can discover and register for relevant community events.",
+        "url": "https://docs.claudecode.sg/use-cases/event-discovery"
+      },
+      {
+        "title": "Connect with AI developers",
+        "description": "Agents can search the member directory to find developers with specific skills for collaboration or hiring.",
+        "url": "https://docs.claudecode.sg/use-cases/member-search"
+      },
+      {
+        "title": "Curate learning paths",
+        "description": "An AI tutor can pull community-curated resources to build personalized learning paths for AI-assisted development.",
+        "url": "https://docs.claudecode.sg/use-cases/learning-paths"
+      }
+    ],
+    "sla": {
+      "response_time": "< 200ms p95 for read operations",
+      "availability": "99.9%",
+      "support_hours": "Community-driven via Discord, typically responsive within 24 hours"
+    }
+  },
+
+  "discovery": {
+    "related": [
+      {
+        "url": "https://freddys.io",
+        "relationship": "partner",
+        "description": "SaaS CV builder — several community members contribute to the Freddy's API"
+      },
+      {
+        "url": "https://anthropic.com",
+        "relationship": "provider",
+        "description": "Creator of Claude and Claude Code — the tools our community builds with"
+      },
+      {
+        "url": "https://engineers.sg",
+        "relationship": "community",
+        "description": "Singapore's broader developer community — we co-organize events occasionally"
+      }
+    ],
+    "alternatives": [
+      {
+        "url": "https://developers.google.com/community/gdg",
+        "name": "GDG Singapore",
+        "differentiator": "Claude Code SG focuses specifically on AI-assisted development and LLM tooling"
+      }
+    ]
+  },
+
+  "policy": {
+    "terms_of_service": "https://claudecode.sg/terms",
+    "privacy_policy": "https://claudecode.sg/privacy",
+    "agent_policy": {
+      "allowed_actions": ["find_events", "get_resources", "find_members", "submit_talk"],
+      "restricted_actions": ["modify_member_profiles", "delete_events", "access_private_channels", "spam_members"],
+      "rate_limits": {
+        "requests_per_minute": 30,
+        "requests_per_hour": 500,
+        "requests_per_day": 5000
+      },
+      "data_handling": {
+        "storage_allowed": true,
+        "retention_period": "7 days",
+        "sharing_allowed": true
+      },
+      "attribution": {
+        "required": true,
+        "format": "Data from Claude Code Singapore (https://claudecode.sg)"
+      }
+    },
+    "data_residency": ["SG"]
+  }
+}

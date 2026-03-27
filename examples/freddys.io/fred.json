@@ -1,0 +1,401 @@
+{
+  "fred": "0.1",
+
+  "identity": {
+    "name": "Freddy's",
+    "type": "product",
+    "description": "AI-powered CV builder that creates professional, ATS-optimized resumes in minutes. Built for job seekers, career changers, and recruiters.",
+    "url": "https://freddys.io",
+    "logo": "https://freddys.io/logo.png",
+    "contacts": [
+      { "type": "email", "value": "hello@freddys.io", "label": "General" },
+      { "type": "email", "value": "support@freddys.io", "label": "Support" },
+      { "type": "social", "value": "https://twitter.com/freddysio", "label": "Twitter" },
+      { "type": "social", "value": "https://linkedin.com/company/freddys-io", "label": "LinkedIn" }
+    ],
+    "locale": "en",
+    "locales": ["zh", "ms", "ja", "ko"],
+    "established": "2024-01-15",
+    "jurisdiction": "SG",
+    "identifiers": {
+      "custom": {
+        "uen": "202400001A"
+      }
+    }
+  },
+
+  "capabilities": [
+    {
+      "id": "create-cv",
+      "name": "Create CV",
+      "description": "Generate a professional, ATS-optimized CV from structured input data. Supports multiple templates and languages.",
+      "category": "content",
+      "inputs": [
+        { "name": "personal_info", "type": "object", "required": true, "description": "Name, email, phone, location, LinkedIn URL" },
+        { "name": "experience", "type": "array", "required": true, "description": "Array of work experience entries with company, role, dates, and descriptions" },
+        { "name": "education", "type": "array", "required": false, "description": "Array of education entries with institution, degree, dates" },
+        { "name": "skills", "type": "array", "required": false, "description": "Array of skill strings" },
+        { "name": "template", "type": "string", "required": false, "description": "Template ID (default: 'professional'). Options: professional, modern, minimal, creative, executive" },
+        { "name": "language", "type": "string", "required": false, "description": "Output language as BCP 47 tag (default: 'en')" }
+      ],
+      "outputs": [
+        { "name": "cv_id", "type": "string", "description": "Unique identifier for the generated CV" },
+        { "name": "cv_url", "type": "string", "description": "URL to view and edit the CV" },
+        { "name": "pdf_url", "type": "string", "description": "Direct download link for PDF format" },
+        { "name": "docx_url", "type": "string", "description": "Direct download link for DOCX format" }
+      ],
+      "constraints": {
+        "rate_limit": "50/hour",
+        "auth_required": true
+      },
+      "examples": [
+        {
+          "description": "Create a basic professional CV",
+          "input": {
+            "personal_info": {
+              "name": "Jane Smith",
+              "email": "jane@example.com",
+              "location": "Singapore"
+            },
+            "experience": [
+              {
+                "company": "TechCorp",
+                "role": "Senior Engineer",
+                "start_date": "2021-03",
+                "end_date": "present",
+                "description": "Led a team of 5 engineers building distributed systems"
+              }
+            ],
+            "template": "professional"
+          },
+          "output": {
+            "cv_id": "cv_abc123",
+            "cv_url": "https://freddys.io/cv/cv_abc123",
+            "pdf_url": "https://freddys.io/cv/cv_abc123/download/pdf",
+            "docx_url": "https://freddys.io/cv/cv_abc123/download/docx"
+          }
+        }
+      ]
+    },
+    {
+      "id": "optimize-cv",
+      "name": "Optimize CV for Job Listing",
+      "description": "Analyze a CV against a specific job listing and suggest optimizations for ATS compatibility and keyword matching.",
+      "category": "content",
+      "inputs": [
+        { "name": "cv_id", "type": "string", "required": true, "description": "ID of an existing CV to optimize" },
+        { "name": "job_url", "type": "string", "required": false, "description": "URL of the job listing to optimize for" },
+        { "name": "job_description", "type": "string", "required": false, "description": "Raw job description text (alternative to job_url)" }
+      ],
+      "outputs": [
+        { "name": "score", "type": "number", "description": "ATS compatibility score (0-100)" },
+        { "name": "suggestions", "type": "array", "description": "Array of optimization suggestions" },
+        { "name": "optimized_cv_id", "type": "string", "description": "ID of the optimized CV version" }
+      ],
+      "constraints": {
+        "rate_limit": "30/hour",
+        "auth_required": true
+      }
+    },
+    {
+      "id": "list-templates",
+      "name": "List Templates",
+      "description": "Get all available CV templates with previews.",
+      "category": "data",
+      "inputs": [],
+      "outputs": [
+        { "name": "templates", "type": "array", "description": "Array of template objects with id, name, preview_url, and description" }
+      ],
+      "constraints": {
+        "rate_limit": "100/hour",
+        "auth_required": false
+      }
+    },
+    {
+      "id": "generate-cover-letter",
+      "name": "Generate Cover Letter",
+      "description": "Generate a tailored cover letter based on a CV and job listing.",
+      "category": "content",
+      "inputs": [
+        { "name": "cv_id", "type": "string", "required": true, "description": "ID of the CV to base the cover letter on" },
+        { "name": "job_url", "type": "string", "required": false, "description": "URL of the target job listing" },
+        { "name": "job_description", "type": "string", "required": false, "description": "Raw job description text" },
+        { "name": "tone", "type": "string", "required": false, "description": "Writing tone: professional (default), conversational, formal" }
+      ],
+      "outputs": [
+        { "name": "cover_letter_id", "type": "string", "description": "Unique ID for the cover letter" },
+        { "name": "content", "type": "string", "description": "The generated cover letter text" },
+        { "name": "pdf_url", "type": "string", "description": "Download link for PDF" }
+      ],
+      "constraints": {
+        "rate_limit": "20/hour",
+        "auth_required": true
+      }
+    }
+  ],
+
+  "interaction": {
+    "protocols": [
+      {
+        "type": "rest",
+        "version": "2",
+        "url": "https://api.freddys.io/v2",
+        "description": "Primary REST API for all CV operations",
+        "auth": {
+          "type": "oauth2",
+          "instructions_url": "https://docs.freddys.io/auth",
+          "scopes": ["cv:read", "cv:write", "templates:read", "cover_letter:write"]
+        }
+      },
+      {
+        "type": "mcp",
+        "url": "https://mcp.freddys.io",
+        "description": "MCP server for direct AI agent integration — supports all CV capabilities"
+      },
+      {
+        "type": "openapi",
+        "version": "3.1",
+        "url": "https://api.freddys.io/openapi.json",
+        "description": "OpenAPI specification for the REST API"
+      },
+      {
+        "type": "browser",
+        "url": "https://freddys.io",
+        "description": "Web application for manual CV creation and management"
+      }
+    ],
+    "webhooks": {
+      "supported": true,
+      "events": ["cv.created", "cv.updated", "cv.exported", "cv.optimized", "cover_letter.created"],
+      "registration_url": "https://api.freddys.io/v2/webhooks"
+    },
+    "rate_limits": {
+      "default": "100/hour",
+      "authenticated": "1000/hour",
+      "burst": "20/minute"
+    },
+    "sdks": [
+      { "language": "javascript", "package": "@freddys/sdk", "url": "https://www.npmjs.com/package/@freddys/sdk" },
+      { "language": "python", "package": "freddys", "url": "https://pypi.org/project/freddys/" }
+    ]
+  },
+
+  "trust": {
+    "verified_domain": true,
+    "verification": [
+      {
+        "type": "business",
+        "issuer": "ACRA Singapore",
+        "url": "https://www.acra.gov.sg",
+        "issued": "2024-01-15"
+      },
+      {
+        "type": "ssl",
+        "issuer": "Let's Encrypt",
+        "issued": "2025-12-01",
+        "expires": "2026-03-01"
+      }
+    ],
+    "reputation": {
+      "users": 15000,
+      "rating": {
+        "score": 4.7,
+        "count": 892,
+        "source": "Trustpilot",
+        "url": "https://www.trustpilot.com/review/freddys.io"
+      },
+      "uptime": {
+        "percentage": 99.95,
+        "url": "https://status.freddys.io"
+      }
+    },
+    "compliance": [
+      { "standard": "GDPR", "status": "compliant", "url": "https://freddys.io/gdpr" },
+      { "standard": "PDPA", "status": "compliant", "url": "https://freddys.io/pdpa" },
+      { "standard": "SOC2", "status": "in_progress" }
+    ],
+    "security": {
+      "security_contact": "security@freddys.io",
+      "security_txt": "https://freddys.io/.well-known/security.txt"
+    },
+    "transparency": {
+      "changelog": "https://freddys.io/changelog",
+      "status_page": "https://status.freddys.io"
+    }
+  },
+
+  "pricing": {
+    "currency": "USD",
+    "model": "freemium",
+    "free_tier": {
+      "available": true,
+      "limits": "3 CVs per month, basic templates only, PDF export"
+    },
+    "plans": [
+      {
+        "id": "free",
+        "name": "Free",
+        "price": { "amount": 0, "interval": "month" },
+        "features": ["3 CVs per month", "5 basic templates", "PDF export", "ATS score check"],
+        "limits": { "cvs_per_month": 3, "templates": "basic", "cover_letters": 0 }
+      },
+      {
+        "id": "pro",
+        "name": "Pro",
+        "description": "For active job seekers who need the full toolkit",
+        "price": { "amount": 12, "interval": "month" },
+        "features": [
+          "Unlimited CVs",
+          "All 20+ templates",
+          "PDF & DOCX export",
+          "AI optimization for job listings",
+          "Cover letter generation",
+          "Multi-language support",
+          "Priority generation"
+        ],
+        "limits": { "cvs_per_month": -1, "templates": "all", "cover_letters": 20 },
+        "url": "https://freddys.io/pricing#pro"
+      },
+      {
+        "id": "enterprise",
+        "name": "Enterprise",
+        "description": "For recruiters, HR teams, and career services",
+        "price": { "amount": 49, "interval": "month" },
+        "features": [
+          "Everything in Pro",
+          "Team management (up to 25 seats)",
+          "Full API access",
+          "Custom branding",
+          "Bulk CV generation",
+          "Priority support",
+          "Webhook integrations"
+        ],
+        "url": "https://freddys.io/pricing#enterprise"
+      }
+    ],
+    "payment_methods": ["credit_card"],
+    "trial": {
+      "available": true,
+      "duration": "14 days",
+      "requires_payment": false
+    },
+    "negotiable": true
+  },
+
+  "context": {
+    "industry": ["hr-tech", "recruitment", "career-services"],
+    "tags": ["cv", "resume", "ai", "job-search", "career-tools", "ats", "cover-letter"],
+    "languages": ["en", "zh", "ms", "ja", "ko"],
+    "faq": [
+      {
+        "question": "What file formats does Freddy's support for export?",
+        "answer": "We export CVs in PDF, DOCX, and HTML formats. Cover letters are available in PDF and plain text."
+      },
+      {
+        "question": "How does ATS optimization work?",
+        "answer": "Our AI analyzes job listings to identify key skills, keywords, and formatting requirements, then suggests changes to maximize ATS compatibility scores."
+      },
+      {
+        "question": "Is my data stored securely?",
+        "answer": "All CV data is encrypted at rest (AES-256) and in transit (TLS 1.3). Data is stored in Singapore and can be permanently deleted at any time from your account settings."
+      },
+      {
+        "question": "Can agents create CVs on behalf of users?",
+        "answer": "Yes. Use the MCP server or REST API with proper OAuth2 authentication. The user must authorize the agent via the standard OAuth2 flow."
+      }
+    ],
+    "knowledge_base": "https://docs.freddys.io",
+    "llms_txt": "https://freddys.io/llms.txt",
+    "changelog": "https://freddys.io/changelog",
+    "blog": "https://freddys.io/blog",
+    "use_cases": [
+      {
+        "title": "Automated job application",
+        "description": "An AI agent can create a tailored CV for each job listing, optimize it for ATS, and generate a matching cover letter — all through the API.",
+        "url": "https://docs.freddys.io/use-cases/automated-application"
+      },
+      {
+        "title": "Career coaching platforms",
+        "description": "Career coaching tools can integrate Freddy's to offer CV creation as part of their coaching workflow.",
+        "url": "https://docs.freddys.io/use-cases/career-coaching"
+      },
+      {
+        "title": "Recruitment agencies",
+        "description": "Recruiters can bulk-generate standardized CVs from candidate data using the Enterprise API.",
+        "url": "https://docs.freddys.io/use-cases/recruitment"
+      }
+    ],
+    "limitations": [
+      "Maximum CV length: 4 pages",
+      "Image uploads limited to 5MB per file",
+      "Cover letters are AI-generated and should be reviewed before submission",
+      "Multi-language translation is AI-powered and may require manual review for specialized terminology"
+    ],
+    "sla": {
+      "response_time": "< 500ms p95 for API calls, < 10s for CV generation",
+      "availability": "99.95%",
+      "support_hours": "Mon-Fri 9:00-18:00 SGT, email support 24/7"
+    }
+  },
+
+  "discovery": {
+    "related": [
+      {
+        "url": "https://linkedin.com",
+        "relationship": "integration",
+        "description": "Import professional profile data from LinkedIn"
+      },
+      {
+        "url": "https://indeed.com",
+        "relationship": "partner",
+        "description": "Direct job application submission integration"
+      },
+      {
+        "url": "https://claudecode.sg",
+        "relationship": "community",
+        "description": "Developer community that builds with the Freddy's API"
+      }
+    ],
+    "alternatives": [
+      {
+        "url": "https://resume.io",
+        "name": "Resume.io",
+        "differentiator": "Freddy's specializes in AI-powered ATS optimization and multi-language support for the APAC market"
+      },
+      {
+        "url": "https://novoresume.com",
+        "name": "Novoresume",
+        "differentiator": "Freddy's offers full API access and MCP integration for AI agent workflows"
+      }
+    ]
+  },
+
+  "policy": {
+    "terms_of_service": "https://freddys.io/terms",
+    "privacy_policy": "https://freddys.io/privacy",
+    "acceptable_use": "https://freddys.io/acceptable-use",
+    "agent_policy": {
+      "allowed_actions": ["create_cv", "optimize_cv", "list_templates", "generate_cover_letter", "export_cv", "read_cv"],
+      "restricted_actions": ["delete_account", "modify_billing", "access_other_users_data", "bulk_scrape_templates"],
+      "rate_limits": {
+        "requests_per_minute": 60,
+        "requests_per_hour": 1000,
+        "requests_per_day": 10000
+      },
+      "data_handling": {
+        "storage_allowed": true,
+        "retention_period": "session",
+        "sharing_allowed": false
+      },
+      "attribution": {
+        "required": true,
+        "format": "CV generated by Freddy's (https://freddys.io)"
+      }
+    },
+    "data_residency": ["SG"],
+    "gdpr": {
+      "dpo_contact": "dpo@freddys.io",
+      "data_processing_agreement": "https://freddys.io/dpa"
+    }
+  }
+}

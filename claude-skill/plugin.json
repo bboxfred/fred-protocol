@@ -1,0 +1,24 @@
+{
+  "name": "fred-protocol",
+  "version": "0.1.1",
+  "description": "Automatically adds FRED Protocol support (fred.json) to any public product, making it discoverable and interactable by AI agents.",
+  "author": "Freddy Lim",
+  "license": "Apache-2.0",
+  "repository": "https://github.com/bboxfred/fred-protocol",
+  "skills": [
+    "skills/fred-protocol"
+  ],
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"${CLAUDE_PLUGIN_ROOT}/hooks/post-deploy-check.mjs\""
+          }
+        ]
+      }
+    ]
+  }
+}
